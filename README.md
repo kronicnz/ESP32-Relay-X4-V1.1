@@ -1,6 +1,7 @@
 # ESP32 Relay Controller (4-Channel)
 
-This project configures an **ESP32 Relay Development Board (ESP32-WROOM, 4-Channel Relay, AC/DC Power Supply)** to control outdoor lights and a 12V solenoid valve.  
+This project configures an **ESP32 Relay Development Board (ESP32-WROOM, 4-Channel Relay, AC/DC Power Supply)** to control outdoor lights and a 12V solenoid valve.
+
 The system integrates with **Home Assistant** for scheduling, weather-based automation, and manual override.  
 
 ---
@@ -61,7 +62,8 @@ The system integrates with **Home Assistant** for scheduling, weather-based auto
 
 ESP32-X4-Relay.yaml
 
-[`esp32_relay_controller.yaml`](esp32_relay_controller.yaml).  
+[`esp32_relay_controller.yaml`](esp32_relay_controller.yaml).
+
 Key sections:
 - Relays, Buttons, LED Indicator
 - Light schedule
