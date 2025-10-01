@@ -1,0 +1,191 @@
+esphome:
+  name: esp32_relay_controller
+  platform: ESP32
+  board: esp32dev
+
+logger:
+
+api:
+  encryption:
+    key: "YOUR_API_KEY_HERE"
+
+ota:
+
+wifi:
+  ssid: "YOUR_WIFI_SSID"
+  password: "YOUR_WIFI_PASSWORD"
+
+  ap:
+    ssid: "esp32_fallback"
+    password: "fallback123"
+
+captive_portal:
+
+# -------------------------------------------------
+# Relays - 4 Channel
+# -------------------------------------------------
+switch:
+  - platform: gpio
+    id: relay_lights
+    pin: 23
+    name: "Outdoor Lights"
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: relay_solenoid
+    pin: 22
+    name: "Water Solenoid"
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - script.execute: solenoid_led_blink
+    on_turn_off:
+      - script.stop: solenoid_led_blink
+      - light.turn_off: solenoid_status_light
+
+  - platform: gpio
+    id: relay3
+    pin: 19
+    name: "Relay 3"
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: relay4
+    pin: 18
+    name: "Relay 4"
+    restore_mode: ALWAYS_OFF
+
+# -------------------------------------------------
+# Solenoid Active LED Indicator (blinking)
+# -------------------------------------------------
+output:
+  - platform: gpio
+    pin: 2
+    id: solenoid_led
+
+light:
+  - platform: binary
+    name: "Solenoid Status LED"
+    id: solenoid_status_light
+    output: solenoid_led
+    internal: true
+
+script:
+  - id: solenoid_led_blink
+    mode: restart
+    then:
+      - while:
+          condition:
+            switch.is_on: relay_solenoid
+          then:
+            - light.turn_on: solenoid_status_light
+            - delay: 500ms
+            - light.turn_off: solenoid_status_light
+            - delay: 500ms
+
+# -------------------------------------------------
+# Buttons (manual overrides)
+# -------------------------------------------------
+binary_sensor:
+  - platform: gpio
+    pin: 34
+    id: button_lights
+    name: "Button Lights"
+    on_press:
+      - switch.toggle: relay_lights
+
+  - platform: gpio
+    pin: 35
+    id: button_solenoid
+    name: "Button Solenoid"
+    on_press:
+      - switch.toggle: relay_solenoid
+      - if:
+          condition:
+            switch.is_on: relay_solenoid
+          then:
+            - script.execute: solenoid_timer
+
+# -------------------------------------------------
+# Time Source
+# -------------------------------------------------
+time:
+  - platform: homeassistant
+    id: ha_time
+
+# -------------------------------------------------
+# Automations - Outdoor Lights
+# -------------------------------------------------
+interval:
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            time.is_between:
+              id: ha_time
+              start_time: "19:00:00"
+              end_time: "22:30:00"
+          then:
+            - switch.turn_on: relay_lights
+          else:
+            - switch.turn_off: relay_lights
+
+# -------------------------------------------------
+# Automations - Solenoid with Weather Conditions
+# -------------------------------------------------
+homeassistant:
+  entities:
+    - entity: weather.home
+    - entity: sensor.outdoor_humidity
+
+interval:
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            and:
+              - time.has_time:
+              - lambda: |-
+                  auto t = id(ha_time).now();
+                  return (t.hour == 10 && t.minute == 0);
+              - lambda: |-
+                  return (id(weather_home).state != "rain");
+              - lambda: |-
+                  if (id(sensor_outdoor_humidity).state.as<float>() < 80.0) return true;
+                  return false;
+          then:
+            - switch.turn_on: relay_solenoid
+            - script.execute: solenoid_timer
+
+# -------------------------------------------------
+# Solenoid Failsafe Script
+# -------------------------------------------------
+script:
+  - id: solenoid_timer
+    mode: restart
+    then:
+      - delay: 30min
+      - switch.turn_off: relay_solenoid
+
+# -------------------------------------------------
+# Optional DHT22 Sensor
+# -------------------------------------------------
+sensor:
+  - platform: dht
+    pin: 21
+    temperature:
+      name: "Greenhouse Temperature"
+    humidity:
+      name: "Greenhouse Humidity"
+    update_interval: 60s
+
+# -------------------------------------------------
+# Optional Battery Voltage Monitor (commented out)
+# -------------------------------------------------
+# sensor:
+#   - platform: adc
+#     pin: 36
+#     name: "Battery Voltage"
+#     attenuation: 11db
+#     update_interval: 60s
+#     filters:
+#       - multiply: 4.7
