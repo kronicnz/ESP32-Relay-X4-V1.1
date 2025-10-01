@@ -173,9 +173,9 @@ sensor:
   - platform: dht
     pin: 21
     temperature:
-      name: "Greenhouse Temperature"
+      name: "Outside Temperature"
     humidity:
-      name: "Greenhouse Humidity"
+      name: "Outside Humidity"
     update_interval: 60s
 
 # -------------------------------------------------
