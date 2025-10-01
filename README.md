@@ -59,7 +59,9 @@ The system integrates with **Home Assistant** for scheduling, weather-based auto
 
 ## YAML Configuration
 
-The full ESPHome configuration is in [`esp32_relay_controller.yaml`](esp32_relay_controller.yaml).  
+ESP32-X4-Relay.yaml
+
+[`ESP32-X4-Relay.yaml`](ESP32-X4-Relay.yaml).  
 Key sections:
 - Relays, Buttons, LED Indicator
 - Light schedule
