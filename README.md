@@ -9,16 +9,16 @@ The system integrates with **Home Assistant** for scheduling, weather-based auto
 
 - **4 Channel Relay Control**
   - Relay 1: Outdoor Lights (scheduled 19:00–22:30, manual override button)
-  - Relay 2: Solenoid Valve (runs at 10:00am for 30 min, weather + humidity conditions, manual override button, failsafe auto-off)
+  - Relay 2: Solenoid Valve (runs at 10:00 am for 30 min, weather + humidity conditions, manual override button, failsafe auto-off)
   - Relay 3: Free for user
   - Relay 4: Free for user
 
 - **Manual Override Buttons**
-  - Each relay can be toggled via physical button
-  - Schedule and failsafe always enforce correct state after override
+  - Each relay can be toggled via a physical button
+  - Schedule and failsafe always enforce the correct state after override
 
 - **Failsafe Timer**
-  - Solenoid always turns off after 30 minutes, even if ESP32 restarts mid-cycle
+  - Solenoid always turns off after 30 minutes, even if the ESP32 restarts mid-cycle
 
 - **LED Indicators**
   - Solenoid: Blinking LED while watering (GPIO2 by default)
@@ -31,7 +31,7 @@ The system integrates with **Home Assistant** for scheduling, weather-based auto
 - **Home Assistant Integration**
   - Syncs time from HA
   - Reads weather and humidity from HA entities
-  - Fully controllable from HA dashboard
+  - Fully controllable from the HA dashboard
 
 ---
 
@@ -50,8 +50,8 @@ The system integrates with **Home Assistant** for scheduling, weather-based auto
 
 ### Wiring Notes
 
-- Solenoid and lights are powered by **12V battery through relays**.  
-- ESP32 is powered by onboard regulator from the same 12V source.  
+- Solenoid and lights are powered by a **12V battery through relays**.  
+- ESP32 is powered by an onboard regulator from the same 12V source.  
 - Voltage divider needed for battery monitoring:  
   - Example: R1 = 100kΩ, R2 = 27kΩ → safe scaling to ESP32 ADC.
 
@@ -61,7 +61,7 @@ The system integrates with **Home Assistant** for scheduling, weather-based auto
 
 ESP32-X4-Relay.yaml
 
-[`ESP32-X4-Relay.yaml`](ESP32-X4-Relay.yaml).  
+[`esp32_relay_controller.yaml`](esp32_relay_controller.yaml).  
 Key sections:
 - Relays, Buttons, LED Indicator
 - Light schedule
@@ -79,8 +79,8 @@ Key sections:
    - Scheduler enforces correct state.
 
 2. **Water Solenoid**  
-   - Runs daily at 10:00am for 30 minutes **only if**:
-     - Forecast is not rain (from HA weather entity)
+   - Runs daily at 10:00 am for 30 minutes **only if**:
+     - Forecast is not rain (from the HA weather entity)
      - Humidity < 80% (from HA sensor)  
    - Blinking LED shows active watering.  
    - Manual button toggle allowed.  
@@ -101,7 +101,7 @@ You can adapt entity names in the YAML to match your HA setup.
 
 - Add resistor divider to GPIO36  
 - Uncomment ADC sensor in YAML  
-- Calibrate multiplier with multimeter for accuracy  
+- Calibrate the multiplier with a multimeter for accuracy  
 
 ---
 
